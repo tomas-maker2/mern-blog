@@ -74,15 +74,14 @@ export const signout = (req, res, next) => {
   }
 };
 
-
-export const getusers = async (req,res,next) => {
-  if(!req.user.isAdmin){
-    return next(errorHandler("You are not allowed to see all users"))
+export const getusers = async (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return next(errorHandler("You are not allowed to see all users"));
   }
   try {
     const startIndex = parseInt(req.query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 9;
-    const sortDirection = req.query.sort === 'asc' ? 1 : -1;
+    const sortDirection = req.query.sort === "asc" ? 1 : -1;
 
     const users = await User.find()
       .sort({ createdAt: sortDirection })
@@ -113,6 +112,21 @@ export const getusers = async (req,res,next) => {
       lastMonthUsers,
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
+
+export const getUser = async (req, res, next) => {
+  try {
+    try {
+      const user = await User.findById(req.params.userId);
+      if (!user) {
+        return next(errorHandler(404, "User not found"));
+      }
+      const { password, ...rest } = user._doc;
+      res.status(200).json(rest);
+    } catch (error) {
+      next(error);
+    }
+  } catch (error) {}
+};
